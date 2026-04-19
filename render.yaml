@@ -1,0 +1,25 @@
+# Render Blueprint for Music Buddies.
+# When you connect this repo on Render, the dashboard will auto-detect this
+# file and provision the service described here. Secret env vars are still
+# entered manually in the Render UI (they're listed as `sync: false`).
+
+services:
+  - type: web
+    name: music-buddies
+    runtime: node
+    plan: free
+    region: frankfurt            # change to oregon / singapore etc if you prefer
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true      # Render generates a long random string
+      - key: SPOTIFY_CLIENT_ID
+        sync: false              # set in Render UI
+      - key: SPOTIFY_CLIENT_SECRET
+        sync: false
+      - key: SPOTIFY_REDIRECT_URI
+        sync: false              # e.g. https://music-buddies.onrender.com/auth/callback
