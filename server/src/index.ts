@@ -1,12 +1,13 @@
 import express from "express";
 import session from "express-session";
+import SqliteStoreFactory from "better-sqlite3-session-store";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { config } from "./config.js";
-import "./db/schema.js"; // initializes DB
+import { db } from "./db/schema.js";
 import { authRouter } from "./routes/auth.js";
 import { meRouter } from "./routes/me.js";
 import { friendsRouter } from "./routes/friends.js";
@@ -33,8 +34,14 @@ if (!isProd) {
 
 app.use(express.json());
 app.use(cookieParser());
+
+const SqliteStore = SqliteStoreFactory(session);
 app.use(
   session({
+    store: new SqliteStore({
+      client: db,
+      expired: { clear: true, intervalMs: 1000 * 60 * 60 * 24 },
+    }),
     secret: config.sessionSecret,
     resave: false,
     saveUninitialized: false,
